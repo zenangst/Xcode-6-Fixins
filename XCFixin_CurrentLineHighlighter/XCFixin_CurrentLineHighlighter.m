@@ -74,7 +74,7 @@
     return self;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -89,7 +89,7 @@
     return @"Current Line Highlight Color...";
 }
 
-- (void) loadHighlightColor
+- (void)loadHighlightColor
 {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 
@@ -105,14 +105,14 @@
     }
 }
 
-- (void) saveHighlightColor:(NSColor*)color
+- (void)saveHighlightColor:(NSColor*)color
 {
     NSData* colorAsData = [NSKeyedArchiver archivedDataWithRootObject:color];
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:colorAsData forKey:[self highlightColorDefaultsKeyName]];
 }
 
-- (void) highlightLineInView:(id)view containingRange:(NSRange)range
+- (void)highlightLineInView:(id)view containingRange:(NSRange)range
 {
     @try {
         [[view layoutManager] addTemporaryAttributes: highlightColorAttributes
@@ -125,7 +125,7 @@
     }
 }
 
-- (void) removeHighlightFromLineInView:(id)view containingRange:(NSRange)range
+- (void)removeHighlightFromLineInView:(id)view containingRange:(NSRange)range
 {
     @try {
         [[view layoutManager] removeTemporaryAttribute: NSBackgroundColorAttributeName
@@ -138,7 +138,7 @@
     }
 }
 
-- (void) selectHighlightColor:(id)sender
+- (void)selectHighlightColor:(id)sender
 {
     NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
@@ -179,7 +179,7 @@
     [window setFrame:frame display:YES];
 }
 
-- (void) colorPanelWillClose:(NSNotification*)notification
+- (void)colorPanelWillClose:(NSNotification*)notification
 {
     NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
@@ -190,7 +190,7 @@
     [colorPanel setAction:nil];
 }
 
-- (void) addItemToApplicationMenu {
+- (void)addItemToApplicationMenu {
     NSMenu* mainMenu = [NSApp mainMenu];
     NSMenu* editorMenu = [[mainMenu itemAtIndex:[mainMenu indexOfItemWithTitle:@"Editor"]] submenu];
 
@@ -208,25 +208,23 @@
     }
 }
 
-- (void) applicationReady:(NSNotification*)notification {
+- (void)applicationReady:(NSNotification*)notification {
     sourceEditorViewClass = NSClassFromString(@"DVTSourceTextView");
     [self loadHighlightColor];
 }
 
-- (void) frameChanged:(NSNotification*)notification
+- (void)frameChanged:(NSNotification*)notification
 {
     id view = [notification object];
 
     if ([view isMemberOfClass: sourceEditorViewClass]) {
-
         [self addItemToApplicationMenu];
-
         [self highlightLineInView:view containingRange:[view selectedRange]];
     }
 }
 
-- (void) selectionChanged:(NSNotification*)notification {
-    //-----------------------------------------------------------------------------------------------
+- (void)selectionChanged:(NSNotification*)notification
+{
     if ([[notification object] isMemberOfClass:sourceEditorViewClass]) {
 
         id view = [notification object];
@@ -241,9 +239,8 @@
     }
 }
 
-+ (void) pluginDidLoad: (NSBundle*)plugin
++ (void)pluginDidLoad: (NSBundle*)plugin
 {
-    // Singleton instance
     static id highlighter = nil;
 
     XCFixinPreflight();
