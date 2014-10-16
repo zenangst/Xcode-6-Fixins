@@ -49,27 +49,28 @@
 - (instancetype)init
 {
     self = [super init];
-    if (self) {
-        sourceEditorViewClass = Nil;
-        highlightColorAttributes = nil;
+    if (!self) return nil;
 
-        NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    sourceEditorViewClass = Nil;
+    highlightColorAttributes = nil;
 
-        [notificationCenter addObserver: self
-                               selector: @selector( applicationReady: )
-                                   name: NSApplicationDidFinishLaunchingNotification
-                                 object: nil];
-        
-        [notificationCenter addObserver: self
-                               selector: @selector( frameChanged: )
-                                   name: NSViewFrameDidChangeNotification
-                                 object: nil];
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
 
-        [notificationCenter addObserver: self
-                               selector: @selector( selectionChanged: )
-                                   name: NSTextViewDidChangeSelectionNotification
-                                 object: nil];
-    }
+    [notificationCenter addObserver: self
+                           selector: @selector( applicationReady: )
+                               name: NSApplicationDidFinishLaunchingNotification
+                             object: nil];
+
+    [notificationCenter addObserver: self
+                           selector: @selector( frameChanged: )
+                               name: NSViewFrameDidChangeNotification
+                             object: nil];
+
+    [notificationCenter addObserver: self
+                           selector: @selector( selectionChanged: )
+                               name: NSTextViewDidChangeSelectionNotification
+                             object: nil];
+
     return self;
 }
 
