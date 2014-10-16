@@ -37,7 +37,7 @@
 
 @interface XCFixin_XCodeCurrentLineHighlighter : NSObject
 {
-  @private
+@private
     Class         sourceEditorViewClass;
     NSDictionary* highlightColorAttributes;
 }
@@ -46,197 +46,198 @@
 
 @implementation XCFixin_XCodeCurrentLineHighlighter
 
-- (id) init {
-  self = [super init];
-  if (self) {
-    sourceEditorViewClass = Nil;
-    highlightColorAttributes = nil;
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        sourceEditorViewClass = Nil;
+        highlightColorAttributes = nil;
 
-    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+        NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
 
-    [notificationCenter addObserver: self
-                           selector: @selector( applicationReady: )
-                               name: NSApplicationDidFinishLaunchingNotification
-                             object: nil];
+        [notificationCenter addObserver: self
+                               selector: @selector( applicationReady: )
+                                   name: NSApplicationDidFinishLaunchingNotification
+                                 object: nil];
+        
+        [notificationCenter addObserver: self
+                               selector: @selector( frameChanged: )
+                                   name: NSViewFrameDidChangeNotification
+                                 object: nil];
 
-    [notificationCenter addObserver: self
-                           selector: @selector( frameChanged: )
-                               name: NSViewFrameDidChangeNotification
-                             object: nil];
-
-    [notificationCenter addObserver: self
-                           selector: @selector( selectionChanged: )
-                               name: NSTextViewDidChangeSelectionNotification
-                             object: nil];
-  }
-  return self;
+        [notificationCenter addObserver: self
+                               selector: @selector( selectionChanged: )
+                                   name: NSTextViewDidChangeSelectionNotification
+                                 object: nil];
+    }
+    return self;
 }
 
 - (void) dealloc
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (NSString*) highlightColorDefaultsKeyName
 {
-  return @"CurrentLineHighlightColor";
+    return @"CurrentLineHighlightColor";
 }
 
 - (NSString*) highlightColorMenuItemTitle
 {
-  return @"Current Line Highlight Color...";
+    return @"Current Line Highlight Color...";
 }
 
 - (void) loadHighlightColor
 {
-  NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 
-  NSData* colorAsData = [userDefaults objectForKey:[self highlightColorDefaultsKeyName]];
+    NSData* colorAsData = [userDefaults objectForKey:[self highlightColorDefaultsKeyName]];
 
-  if ( colorAsData != nil ) {
-    NSColor* color = [NSKeyedUnarchiver unarchiveObjectWithData:colorAsData];
+    if ( colorAsData != nil ) {
+        NSColor* color = [NSKeyedUnarchiver unarchiveObjectWithData:colorAsData];
 
-    highlightColorAttributes =
+        highlightColorAttributes =
         [NSDictionary dictionaryWithObjectsAndKeys: color,
-                                                    NSBackgroundColorAttributeName,
-                                                    nil];
-  }
+         NSBackgroundColorAttributeName,
+         nil];
+    }
 }
 
 - (void) saveHighlightColor:(NSColor*)color
 {
-  NSData* colorAsData = [NSKeyedArchiver archivedDataWithRootObject:color];
-  NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-  [userDefaults setObject:colorAsData forKey:[self highlightColorDefaultsKeyName]];
+    NSData* colorAsData = [NSKeyedArchiver archivedDataWithRootObject:color];
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:colorAsData forKey:[self highlightColorDefaultsKeyName]];
 }
 
 - (void) highlightLineInView:(id)view containingRange:(NSRange)range
 {
-  @try {
-    [[view layoutManager] addTemporaryAttributes: highlightColorAttributes
-                               forCharacterRange: [[view string] lineRangeForRange:range] ];
-  }
-  @catch ( NSException* exception ) {
-    if ( [[exception name] isNotEqualTo:NSRangeException] ) {
-      @throw exception;
+    @try {
+        [[view layoutManager] addTemporaryAttributes: highlightColorAttributes
+                                   forCharacterRange: [[view string] lineRangeForRange:range] ];
     }
-  }
+    @catch ( NSException* exception ) {
+        if ( [[exception name] isNotEqualTo:NSRangeException] ) {
+            @throw exception;
+        }
+    }
 }
 
 - (void) removeHighlightFromLineInView:(id)view containingRange:(NSRange)range
 {
-  @try {
-    [[view layoutManager] removeTemporaryAttribute: NSBackgroundColorAttributeName
-                                 forCharacterRange: [[view string] lineRangeForRange:range]];
-  }
-  @catch ( NSException* exception ) {
-    if ( [[exception name] isNotEqualTo:NSRangeException] ) {
-      @throw exception;
+    @try {
+        [[view layoutManager] removeTemporaryAttribute: NSBackgroundColorAttributeName
+                                     forCharacterRange: [[view string] lineRangeForRange:range]];
     }
-  }
+    @catch ( NSException* exception ) {
+        if ( [[exception name] isNotEqualTo:NSRangeException] ) {
+            @throw exception;
+        }
+    }
 }
 
 - (void) selectHighlightColor:(id)sender
 {
-  NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
+    NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
-  NSColor* color = [highlightColorAttributes objectForKey:NSBackgroundColorAttributeName];
-  [colorPanel setColor:color];
-  [colorPanel setTarget:self];
-  [colorPanel setAction:@selector(changeColor:)];
+    NSColor* color = [highlightColorAttributes objectForKey:NSBackgroundColorAttributeName];
+    [colorPanel setColor:color];
+    [colorPanel setTarget:self];
+    [colorPanel setAction:@selector(changeColor:)];
 
-  [[NSNotificationCenter defaultCenter] addObserver: self
-                                           selector: @selector( colorPanelWillClose: )
-                                               name: NSWindowWillCloseNotification
-                                             object: colorPanel];
-  [NSApp orderFrontColorPanel:nil];
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector( colorPanelWillClose: )
+                                                 name: NSWindowWillCloseNotification
+                                               object: colorPanel];
+    [NSApp orderFrontColorPanel:nil];
 }
 
 - (IBAction)changeColor:(id)sender
 {
-  NSColorPanel* colorPanel = [NSColorPanel sharedColorPanel];
+    NSColorPanel* colorPanel = [NSColorPanel sharedColorPanel];
 
-  highlightColorAttributes =
-      [NSDictionary dictionaryWithObjectsAndKeys: [colorPanel color],
-                                                  NSBackgroundColorAttributeName,
-                                                  nil];
-  [self saveHighlightColor:[colorPanel color]];
+    highlightColorAttributes =
+    [NSDictionary dictionaryWithObjectsAndKeys: [colorPanel color],
+     NSBackgroundColorAttributeName,
+     nil];
+    [self saveHighlightColor:[colorPanel color]];
 
-  // Update window size (grow then back to what it was) in order to cause frame
-  // change even. This is because we can't have a guaranteed valid reference to
-  // the view. Kind of silly, but better than crashing.
-  //
-  id window = [NSApp mainWindow];
-  NSRect frame = [window frame];
-  NSRect tempFrame = NSMakeRect( frame.origin.x,
-                                 frame.origin.y,
-                                 frame.size.width,
-                                 frame.size.height + 1.0 );
+    // Update window size (grow then back to what it was) in order to cause frame
+    // change even. This is because we can't have a guaranteed valid reference to
+    // the view. Kind of silly, but better than crashing.
+    //
+    id window = [NSApp mainWindow];
+    NSRect frame = [window frame];
+    NSRect tempFrame = NSMakeRect( frame.origin.x,
+                                  frame.origin.y,
+                                  frame.size.width,
+                                  frame.size.height + 1.0 );
 
-  [window setFrame:tempFrame display:YES];
-  [window setFrame:frame display:YES];
+    [window setFrame:tempFrame display:YES];
+    [window setFrame:frame display:YES];
 }
 
 - (void) colorPanelWillClose:(NSNotification*)notification
 {
-  NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
+    NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
-  [[NSNotificationCenter defaultCenter] removeObserver: self
-                                                  name: NSWindowWillCloseNotification
-                                                object: colorPanel];
-  [colorPanel setTarget:nil];
-  [colorPanel setAction:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver: self
+                                                    name: NSWindowWillCloseNotification
+                                                  object: colorPanel];
+    [colorPanel setTarget:nil];
+    [colorPanel setAction:nil];
 }
 
 - (void) addItemToApplicationMenu {
-  NSMenu* mainMenu = [NSApp mainMenu];
-  NSMenu* editorMenu = [[mainMenu itemAtIndex:[mainMenu indexOfItemWithTitle:@"Editor"]] submenu];
+    NSMenu* mainMenu = [NSApp mainMenu];
+    NSMenu* editorMenu = [[mainMenu itemAtIndex:[mainMenu indexOfItemWithTitle:@"Editor"]] submenu];
 
-  if ( editorMenu != nil &&
-       [editorMenu itemWithTitle:[self highlightColorMenuItemTitle]] == nil ) {
+    if ( editorMenu != nil &&
+        [editorMenu itemWithTitle:[self highlightColorMenuItemTitle]] == nil ) {
 
-    NSMenuItem* newItem = [NSMenuItem new];
+        NSMenuItem* newItem = [NSMenuItem new];
 
-    [newItem setTitle:[self highlightColorMenuItemTitle]];  // note: not localized
-    [newItem setTarget:self];
-    [newItem setAction:@selector( selectHighlightColor: )];
-    [newItem setEnabled:YES];
+        [newItem setTitle:[self highlightColorMenuItemTitle]];  // note: not localized
+        [newItem setTarget:self];
+        [newItem setAction:@selector( selectHighlightColor: )];
+        [newItem setEnabled:YES];
 
-    [editorMenu insertItem:newItem atIndex:[editorMenu numberOfItems]];
-  }
+        [editorMenu insertItem:newItem atIndex:[editorMenu numberOfItems]];
+    }
 }
 
 - (void) applicationReady:(NSNotification*)notification {
-  sourceEditorViewClass = NSClassFromString(@"DVTSourceTextView");
-  [self loadHighlightColor];
+    sourceEditorViewClass = NSClassFromString(@"DVTSourceTextView");
+    [self loadHighlightColor];
 }
 
 - (void) frameChanged:(NSNotification*)notification
 {
-  id view = [notification object];
+    id view = [notification object];
 
-  if ([view isMemberOfClass: sourceEditorViewClass]) {
+    if ([view isMemberOfClass: sourceEditorViewClass]) {
 
-    [self addItemToApplicationMenu];
+        [self addItemToApplicationMenu];
 
-    [self highlightLineInView:view containingRange:[view selectedRange]];
-  }
+        [self highlightLineInView:view containingRange:[view selectedRange]];
+    }
 }
 
 - (void) selectionChanged:(NSNotification*)notification {
-//-----------------------------------------------------------------------------------------------
-  if ([[notification object] isMemberOfClass:sourceEditorViewClass]) {
+    //-----------------------------------------------------------------------------------------------
+    if ([[notification object] isMemberOfClass:sourceEditorViewClass]) {
 
-    id view = [notification object];
-    NSRange oldRange = [[[notification userInfo] objectForKey:@"NSOldSelectedCharacterRange"] rangeValue];
-    NSRange newRange = [view selectedRange];
+        id view = [notification object];
+        NSRange oldRange = [[[notification userInfo] objectForKey:@"NSOldSelectedCharacterRange"] rangeValue];
+        NSRange newRange = [view selectedRange];
 
-    [self removeHighlightFromLineInView:view containingRange:oldRange];
+        [self removeHighlightFromLineInView:view containingRange:oldRange];
 
-    if ( newRange.length == 0 ) { // not a multi-line selection
-      [self highlightLineInView:view containingRange:newRange];
+        if ( newRange.length == 0 ) { // not a multi-line selection
+            [self highlightLineInView:view containingRange:newRange];
+        }
     }
-  }
 }
 
 + (void) pluginDidLoad: (NSBundle*)plugin
@@ -249,7 +250,7 @@
     highlighter = [[XCFixin_XCodeCurrentLineHighlighter alloc] init];
 
     if (!highlighter) {
-      NSLog(@"%s: highlighter init failed.\n",__FUNCTION__);
+        NSLog(@"%s: highlighter init failed.\n",__FUNCTION__);
     }
 
     XCFixinPostflight();
