@@ -91,6 +91,8 @@ static NSString * ZENHighlightColorMenuItemTitle = @"Current Line Highlight Colo
                                name: NSTextViewDidChangeSelectionNotification
                              object: nil];
 
+    [notificationCenter addObserver:self selector:@selector(editorAreaDidChanged:) name:ZENEditorAreaDidChangeNotification object:nil];
+
     return self;
 }
 
@@ -224,6 +226,11 @@ static NSString * ZENHighlightColorMenuItemTitle = @"Current Line Highlight Colo
 }
 
 #pragma mark - Notifications
+
+- (void)editorAreaDidChanged:(NSNotification *)notification
+{
+
+}
 
 - (void)applicationReady:(NSNotification*)notification {
     sourceEditorViewClass = NSClassFromString(@"DVTSourceTextView");
