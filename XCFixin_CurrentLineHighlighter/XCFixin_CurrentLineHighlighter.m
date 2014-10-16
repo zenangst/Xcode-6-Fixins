@@ -43,8 +43,28 @@
 }
 @end
 
+static NSString * ZENEditorAreaDidChangeNotification = @"ZENEditorAreaDidChangeNotification";
+static NSString * ZENHighlightColorDefaultsKeyName = @"CurrentLineHighlightColor";
+static NSString * ZENHighlightColorMenuItemTitle = @"Current Line Highlight Color...";
 
 @implementation XCFixin_XCodeCurrentLineHighlighter
+
++ (void)pluginDidLoad: (NSBundle*)plugin
+{
+    static id highlighter = nil;
+
+    XCFixinPreflight();
+
+    highlighter = [[XCFixin_XCodeCurrentLineHighlighter alloc] init];
+
+    if (!highlighter) {
+        NSLog(@"%s: highlighter init failed.\n",__FUNCTION__);
+    }
+
+    XCFixinPostflight();
+}
+
+#pragma mark - Initialization
 
 - (instancetype)init
 {
@@ -79,12 +99,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (NSString*) highlightColorDefaultsKeyName
-{
-    return @"CurrentLineHighlightColor";
-}
-
-- (NSString*) highlightColorMenuItemTitle
+- (NSString*)highlightColorMenuItemTitle
 {
     return @"Current Line Highlight Color...";
 }
@@ -93,7 +108,7 @@
 {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 
-    NSData* colorAsData = [userDefaults objectForKey:[self highlightColorDefaultsKeyName]];
+    NSData* colorAsData = [userDefaults objectForKey:ZENHighlightColorDefaultsKeyName];
 
     if ( colorAsData != nil ) {
         NSColor* color = [NSKeyedUnarchiver unarchiveObjectWithData:colorAsData];
@@ -109,7 +124,7 @@
 {
     NSData* colorAsData = [NSKeyedArchiver archivedDataWithRootObject:color];
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:colorAsData forKey:[self highlightColorDefaultsKeyName]];
+    [userDefaults setObject:colorAsData forKey:ZENHighlightColorDefaultsKeyName];
 }
 
 - (void)highlightLineInView:(id)view containingRange:(NSRange)range
@@ -208,6 +223,8 @@
     }
 }
 
+#pragma mark - Notifications
+
 - (void)applicationReady:(NSNotification*)notification {
     sourceEditorViewClass = NSClassFromString(@"DVTSourceTextView");
     [self loadHighlightColor];
@@ -217,7 +234,7 @@
 {
     id view = [notification object];
 
-    if ([view isMemberOfClass: sourceEditorViewClass]) {
+    if ([view isMemberOfClass:sourceEditorViewClass]) {
         [self addItemToApplicationMenu];
         [self highlightLineInView:view containingRange:[view selectedRange]];
     }
@@ -237,21 +254,6 @@
             [self highlightLineInView:view containingRange:newRange];
         }
     }
-}
-
-+ (void)pluginDidLoad: (NSBundle*)plugin
-{
-    static id highlighter = nil;
-
-    XCFixinPreflight();
-
-    highlighter = [[XCFixin_XCodeCurrentLineHighlighter alloc] init];
-
-    if (!highlighter) {
-        NSLog(@"%s: highlighter init failed.\n",__FUNCTION__);
-    }
-
-    XCFixinPostflight();
 }
 
 @end
