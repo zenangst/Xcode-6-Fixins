@@ -77,17 +77,17 @@ static NSString * ZENHighlightColorMenuItemTitle = @"Current Line Highlight Colo
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
 
     [notificationCenter addObserver: self
-                           selector: @selector( applicationReady: )
+                           selector: @selector(applicationReady:)
                                name: NSApplicationDidFinishLaunchingNotification
                              object: nil];
 
     [notificationCenter addObserver: self
-                           selector: @selector( frameChanged: )
+                           selector: @selector(frameChanged:)
                                name: NSViewFrameDidChangeNotification
                              object: nil];
 
     [notificationCenter addObserver: self
-                           selector: @selector( selectionChanged: )
+                           selector: @selector(selectionChanged:)
                                name: NSTextViewDidChangeSelectionNotification
                              object: nil];
 
